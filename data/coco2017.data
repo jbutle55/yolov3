@@ -1,4 +1,4 @@
 classes=80
-train=coco/train2017_remote.txt
-valid=coco/val2017_remote.txt
+train=coco17/train2017_remote.txt
+valid=coco17/val2017_remote.txt
 names=data/coco.names
