@@ -75,7 +75,7 @@ def test(cfg,
     model.eval()
     _ = model(torch.zeros((1, 3, imgsz, imgsz), device=device)) if device.type != 'cpu' else None  # run once
     coco91class = coco80_to_coco91_class()
-    s = ('%20s' + '%10s' * 6) % ('Class', 'Images', 'Targets', 'P', 'R', 'mAP@0.5', 'F1')
+    s = ('%20s' + '%10s' * 8) % ('Class', 'Images', 'Targets', 'P', 'R', 'mAP@0.5', 'F1', 'T. Pos', 'F. Pos.')
     p, r, f1, mp, mr, map, mf1, t0, t1 = 0., 0., 0., 0., 0., 0., 0., 0., 0.
     loss = torch.zeros(3, device=device)
     jdict, stats, ap, ap_class = [], [], [], []
@@ -146,7 +146,7 @@ def test(cfg,
                 # Per target class
                 for cls in torch.unique(tcls_tensor):
                     ti = (cls == tcls_tensor).nonzero().view(-1)  # target indices
-                    pi = (cls == pred[:, 5]).nonzero().view(-1)  # prediction indices
+                    pi = (cls == pred[:, 5]).nonzero().view(-1)  # prediction indices matching cls
 
                     # Search for detections
                     if pi.shape[0]:
@@ -154,7 +154,7 @@ def test(cfg,
                         ious, i = box_iou(pred[pi, :4], tbox[ti]).max(1)  # best ious, indices
 
                         # Append detections
-                        for j in (ious > iouv[0]).nonzero():
+                        for j in (ious > iouv[0]).nonzero():  # Index of ious greater than thresh
                             d = ti[i[j]]  # detected target
                             if d not in detected:
                                 detected.append(d)
@@ -175,22 +175,23 @@ def test(cfg,
     # Compute statistics
     stats = [np.concatenate(x, 0) for x in zip(*stats)]  # to numpy
     if len(stats):
-        p, r, ap, f1, ap_class = ap_per_class(*stats)
+        p, r, ap, f1, ap_class, ntp, nfp = ap_per_class(*stats)
         if niou > 1:
             p, r, ap, f1 = p[:, 0], r[:, 0], ap.mean(1), ap[:, 0]  # [P, R, AP@0.5:0.95, AP@0.5]
         mp, mr, map, mf1 = p.mean(), r.mean(), ap.mean(), f1.mean()
+        mntp, mnfp = ntp.sum(), nfp.sum()
         nt = np.bincount(stats[3].astype(np.int64), minlength=nc)  # number of targets per class
     else:
         nt = torch.zeros(1)
 
     # Print results
-    pf = '%20s' + '%10.3g' * 6  # print format
-    print(pf % ('all', seen, nt.sum(), mp, mr, map, mf1))
+    pf = '%20s' + '%10.3g' * 8  # print format
+    print(pf % ('all', seen, nt.sum(), mp, mr, map, mf1, mntp, mnfp))
 
     # Print results per class
     if verbose and nc > 1 and len(stats):
         for i, c in enumerate(ap_class):
-            print(pf % (names[c], seen, nt[c], p[i], r[i], ap[i], f1[i]))
+            print(pf % (names[c], seen, nt[c], p[i], r[i], ap[i], f1[i], ntp[i], nfp[i]))
 
     # Print speeds
     if verbose or save_json:

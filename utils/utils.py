@@ -167,6 +167,7 @@ def ap_per_class(tp, conf, pred_cls, target_cls):
     pr_score = 0.1  # score to evaluate P and R https://github.com/ultralytics/yolov3/issues/898
     s = [unique_classes.shape[0], tp.shape[1]]  # number class, number iou thresholds (i.e. 10 for mAP0.5...0.95)
     ap, p, r = np.zeros(s), np.zeros(s), np.zeros(s)
+    nfp, ntp = np.zeros(s), np.zeros(s)
     for ci, c in enumerate(unique_classes):
         i = pred_cls == c
         n_gt = (target_cls == c).sum()  # Number of ground truth objects
@@ -178,6 +179,12 @@ def ap_per_class(tp, conf, pred_cls, target_cls):
             # Accumulate FPs and TPs
             fpc = (1 - tp[i]).cumsum(0)
             tpc = tp[i].cumsum(0)
+
+            fp_index = (1 - tp[i]).nonzero()[0]
+            false_p = [fp for j in fp_index for fp in tp[i][j] if conf[i][j] > 0.5]
+
+            nfp[ci] = len(false_p)  # For each unique class
+            ntp[ci] = tpc[-1]
 
             # Recall
             recall = tpc / (n_gt + 1e-16)  # recall curve
@@ -204,7 +211,7 @@ def ap_per_class(tp, conf, pred_cls, target_cls):
     # Compute F1 score (harmonic mean of precision and recall)
     f1 = 2 * p * r / (p + r + 1e-16)
 
-    return p, r, ap, f1, unique_classes.astype('int32')
+    return p, r, ap, f1, unique_classes.astype('int32'), ntp, nfp
 
 
 def compute_ap(recall, precision):
