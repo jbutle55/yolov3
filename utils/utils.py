@@ -181,9 +181,10 @@ def ap_per_class(tp, conf, pred_cls, target_cls):
             tpc = tp[i].cumsum(0)
 
             fp_index = (1 - tp[i]).nonzero()[0]
-            false_p = [fp for j in fp_index for fp in tp[i][j] if conf[i][j] > 0.5]
+            fp_conf = conf[i][fp_index]
+            false_p = (fp_conf > 0.5).cumsum()
 
-            nfp[ci] = len(false_p)  # For each unique class
+            nfp[ci] = false_p[-1]  # For each unique class
             ntp[ci] = tpc[-1]
 
             # Recall
