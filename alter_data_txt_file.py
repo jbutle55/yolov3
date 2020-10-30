@@ -10,7 +10,7 @@ with open(txt_file) as fin:
         for line in fin:
             #line = line.lstrip('.')
             #line = '/Users/justinbutler/Desktop/school/Calgary/ML_Work/Datasets/COCO2017' + line
-
-            line = '/data2/DATA_justin/stanford_dataset/sdd/JPEGImages/' + line + '.jpg'
+            line = line.rstrip()
+            line = '/data2/DATA_justin/stanford_dataset/sdd/JPEGImages/' + line + '.jpg\n'
 
             fout.write(line)
