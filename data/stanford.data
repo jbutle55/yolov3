@@ -1,0 +1,4 @@
+classes=6
+train=/data2/DATA_justin/stanford_dataset/ssd/ImageSets/Main/train_abs.txt
+valid=/data2/DATA_justin/stanford_dataset/ssd/ImageSets/Main/val_abs.txt
+names=data/stanford.names
