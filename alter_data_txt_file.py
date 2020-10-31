@@ -12,5 +12,6 @@ with open(txt_file) as fin:
             #line = '/Users/justinbutler/Desktop/school/Calgary/ML_Work/Datasets/COCO2017' + line
             line = line.rstrip()
             line = '/data2/DATA_justin/stanford_dataset/sdd/images/' + line + '.jpg\n'
+            #line = '/Users/justinbutler/Desktop/StanfordDataset/sdd/images/' + line + '.jpg\n'
 
             fout.write(line)
