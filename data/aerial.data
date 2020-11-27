@@ -1,5 +1,5 @@
 classes=9
 train=/data2/DATA_justin/aerial-cars-private/aerial_yolo/train_set_abs.txt
-valid=/data2/DATA_justin/aerial-cars-private/aerial_yolo/train_set_abs.txt
+valid=/data2/DATA_justin/aerial-cars-private/aerial_yolo/valid_set_abs.txt
 names=/home/justin/ml_models/yolov3/data/aerial.names
 
